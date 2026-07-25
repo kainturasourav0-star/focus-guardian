@@ -100,6 +100,7 @@ apiClient.interceptors.request.use(async (config) => {
           type: body?.type || 'coding',
           target_hours: body?.target_hours || 4,
           current_hours: 0,
+          deadline: null,
           completed: false,
           created_at: new Date().toISOString()
         }

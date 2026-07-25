@@ -56,9 +56,9 @@ export default function App() {
 
     // Seed mock data for stores immediately
     const mockGoals = [
-      { id: 1, title: 'Code Focus Guardian', type: 'coding', target_hours: 6, current_hours: 4.5, completed: false, created_at: new Date().toISOString() },
-      { id: 2, title: 'Read Rust Docs', type: 'reading', target_hours: 2, current_hours: 1, completed: false, created_at: new Date().toISOString() },
-      { id: 3, title: 'Math practice', type: 'study', target_hours: 4, current_hours: 4, completed: true, created_at: new Date().toISOString() }
+      { id: 1, title: 'Code Focus Guardian', type: 'coding' as const, target_hours: 6, current_hours: 4.5, deadline: null, completed: false, created_at: new Date().toISOString() },
+      { id: 2, title: 'Read Rust Docs', type: 'reading' as const, target_hours: 2, current_hours: 1, deadline: null, completed: false, created_at: new Date().toISOString() },
+      { id: 3, title: 'Math practice', type: 'study' as const, target_hours: 4, current_hours: 4, deadline: null, completed: true, created_at: new Date().toISOString() }
     ];
     
     useSettingsStore.getState().setSettings({

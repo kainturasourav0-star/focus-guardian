@@ -128,13 +128,12 @@ export default function Settings() {
                     <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">AI Coach Tone</label>
                     <select
                       defaultValue={settings.ai_coach_tone || 'motivational'}
-                      onChange={(e) => updateSettings({ ai_coach_tone: e.target.value })}
+                      onChange={(e) => updateSettings({ ai_coach_tone: e.target.value as 'motivational' | 'brutal' | 'calm' })}
                       className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-all"
                     >
                       <option value="motivational">Motivational</option>
-                      <option value="strict">Strict</option>
-                      <option value="gentle">Gentle</option>
-                      <option value="analytical">Analytical</option>
+                      <option value="brutal">Strict / Brutal</option>
+                      <option value="calm">Calm & Gentle</option>
                     </select>
                   </div>
                 </div>

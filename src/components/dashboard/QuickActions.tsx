@@ -14,7 +14,6 @@ interface Action {
 
 export default function QuickActions() {
   const navigate = useNavigate();
-  const { currentSession } = useSessionStore();
 
   const actions: Action[] = [
     {
