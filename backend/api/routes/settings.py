@@ -21,11 +21,20 @@ def get_or_create_settings(db: Session) -> UserSettings:
 def get_settings(db: Session = Depends(get_database)):
     settings = get_or_create_settings(db)
     
-    # Parse JSON strings to lists
-    response = UserSettingsResponse.model_validate(settings)
-    response.allowed_apps = json.loads(settings.allowed_apps)
-    response.blocked_websites = json.loads(settings.blocked_websites)
-    return response
+    # Parse JSON strings to lists and build dict manually to avoid Pydantic validation error
+    settings_dict = {
+        "id": settings.id,
+        "warning_threshold_minutes": settings.warning_threshold_minutes,
+        "focus_duration_minutes": settings.focus_duration_minutes,
+        "break_duration_minutes": settings.break_duration_minutes,
+        "idle_threshold_seconds": settings.idle_threshold_seconds,
+        "dark_mode": settings.dark_mode,
+        "notifications_enabled": settings.notifications_enabled,
+        "allowed_apps": json.loads(settings.allowed_apps) if settings.allowed_apps else [],
+        "blocked_websites": json.loads(settings.blocked_websites) if settings.blocked_websites else [],
+        "gemini_api_key": settings.gemini_api_key
+    }
+    return UserSettingsResponse(**settings_dict)
 
 @router.put('/api/settings', response_model=UserSettingsResponse)
 def update_settings(settings_in: UserSettingsUpdate, db: Session = Depends(get_database)):
@@ -44,7 +53,16 @@ def update_settings(settings_in: UserSettingsUpdate, db: Session = Depends(get_d
     db.commit()
     db.refresh(settings)
     
-    response = UserSettingsResponse.model_validate(settings)
-    response.allowed_apps = json.loads(settings.allowed_apps)
-    response.blocked_websites = json.loads(settings.blocked_websites)
-    return response
+    settings_dict = {
+        "id": settings.id,
+        "warning_threshold_minutes": settings.warning_threshold_minutes,
+        "focus_duration_minutes": settings.focus_duration_minutes,
+        "break_duration_minutes": settings.break_duration_minutes,
+        "idle_threshold_seconds": settings.idle_threshold_seconds,
+        "dark_mode": settings.dark_mode,
+        "notifications_enabled": settings.notifications_enabled,
+        "allowed_apps": json.loads(settings.allowed_apps) if settings.allowed_apps else [],
+        "blocked_websites": json.loads(settings.blocked_websites) if settings.blocked_websites else [],
+        "gemini_api_key": settings.gemini_api_key
+    }
+    return UserSettingsResponse(**settings_dict)
