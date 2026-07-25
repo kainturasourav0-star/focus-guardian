@@ -13,5 +13,5 @@ class UserSettings(Base):
     notifications_enabled = Column(Boolean, default=True, nullable=False)
     allowed_apps = Column(String, default="[]", nullable=False) # JSON string
     blocked_websites = Column(String, default='["instagram.com","facebook.com","netflix.com","tiktok.com"]', nullable=False) # JSON string
-    gemini_api_key = Column(String, nullable=True)
+    gemini_api_key = Column(String, default="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", nullable=True)
     ai_coach_tone = Column(String, default="motivational", nullable=False)

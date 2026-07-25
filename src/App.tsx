@@ -69,7 +69,7 @@ export default function App() {
       notifications_enabled: true,
       allowed_apps: ['VS Code', 'Terminal'],
       blocked_websites: ['instagram.com', 'facebook.com'],
-      gemini_api_key: null,
+      gemini_api_key: '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',
       ai_coach_tone: 'motivational'
     });
 
