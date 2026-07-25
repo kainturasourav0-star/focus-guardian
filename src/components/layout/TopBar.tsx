@@ -3,11 +3,13 @@ import { useLocation } from 'react-router-dom';
 import { Minus, Square, X, Search, Bell, Sparkles, User, Zap } from 'lucide-react';
 import { useSessionStore } from '../../store/useSessionStore';
 import { useMonitorStore } from '../../store/useMonitorStore';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export default function TopBar() {
   const location = useLocation();
   const { currentSession } = useSessionStore();
   const wsConnected = useMonitorStore((state) => state.isConnected);
+  const { user, logout } = useAuthStore();
 
   const handleMinimize = () => window.electronAPI?.minimize();
   const handleMaximize = () => window.electronAPI?.maximize();
@@ -72,8 +74,12 @@ export default function TopBar() {
         </button>
 
         {/* User avatar */}
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 border border-white/10 text-white text-xs font-bold shadow-md cursor-pointer hover:opacity-90 transition-opacity">
-          SK
+        <div 
+          onClick={logout}
+          title="Click to sign out"
+          className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 border border-white/10 text-white text-xs font-bold shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+        >
+          {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'FG'}
         </div>
 
         <div className="h-4 w-[1px] bg-white/5" />
