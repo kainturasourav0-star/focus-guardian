@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Square, Pause, RotateCcw, Target, ShieldAlert, Clock, Flame, Volume2 } from 'lucide-react';
+import { Play, Square, Pause, RotateCcw, Target, ShieldAlert, Clock, Flame, Volume2, Cpu, BookOpen, Pencil, Globe } from 'lucide-react';
 import ProgressRing from '../components/focus/ProgressRing';
 import MotivationalQuote from '../components/focus/MotivationalQuote';
+import SmartBreakOverlay from '../components/focus/SmartBreakOverlay';
 import { Button } from '../components/ui/Button';
 import { GlassCard } from '../components/ui/GlassCard';
 import { useSessionStore } from '../store/useSessionStore';
@@ -19,10 +20,22 @@ export default function FocusMode() {
     resetTimer
   } = useSessionStore();
   
-  const { timeDistractedToday } = useMonitorStore();
+  const { timeDistractedToday, currentApp, currentClassification } = useMonitorStore();
   const [taskName, setTaskName] = useState('');
   const [isPaused, setIsPaused] = useState(false);
   const [activeSound, setActiveSound] = useState('None');
+  const [showBreakOverlay, setShowBreakOverlay] = useState(false);
+  const [breakShownAt, setBreakShownAt] = useState<number | null>(null);
+
+  // Smart Session Type Detection from active app
+  const sessionType = (() => {
+    const app = currentApp?.toLowerCase() || '';
+    if (['vs code', 'cursor', 'intellij', 'android studio', 'terminal'].some(a => app.includes(a))) return { label: 'Coding', icon: <Cpu size={12} />, color: 'text-cyan-400' };
+    if (['notion', 'obsidian', 'word', 'docs'].some(a => app.includes(a))) return { label: 'Writing', icon: <Pencil size={12} />, color: 'text-purple-400' };
+    if (['figma', 'photoshop', 'illustrator'].some(a => app.includes(a))) return { label: 'Designing', icon: <Target size={12} />, color: 'text-pink-400' };
+    if (['chrome', 'firefox', 'edge', 'brave'].some(a => app.includes(a))) return { label: 'Researching', icon: <Globe size={12} />, color: 'text-amber-400' };
+    return { label: 'Studying', icon: <BookOpen size={12} />, color: 'text-emerald-400' };
+  })();
 
   const handleToggleSound = (sound: string) => {
     const player = document.getElementById('ambient-audio-player') as HTMLAudioElement;
@@ -80,8 +93,19 @@ export default function FocusMode() {
     if (confirm('End this focus session? This will save your productivity score.')) {
       await endSession();
       setIsPaused(false);
+      setShowBreakOverlay(false);
     }
   };
+
+  // Smart Break Detection: suggest break after 90 minutes
+  useEffect(() => {
+    if (!currentSession || isPaused) return;
+    const ninetyMin = 90 * 60;
+    if (elapsedSeconds >= ninetyMin && breakShownAt === null) {
+      setShowBreakOverlay(true);
+      setBreakShownAt(elapsedSeconds);
+    }
+  }, [elapsedSeconds, currentSession, isPaused, breakShownAt]);
 
   const handleReset = () => {
     if (confirm('Reset the focus timer? Your progress will restart.')) {
@@ -146,6 +170,15 @@ export default function FocusMode() {
       animate={{ opacity: 1 }}
       className="max-w-3xl mx-auto flex flex-col items-center justify-center p-6 min-h-[80vh] relative"
     >
+      {/* Smart Break Overlay */}
+      <SmartBreakOverlay
+        isVisible={showBreakOverlay}
+        sessionMinutes={Math.floor(elapsedSeconds / 60)}
+        onTakeBreak={() => { setShowBreakOverlay(false); setIsPaused(true); }}
+        onExtend={() => { setShowBreakOverlay(false); setBreakShownAt((breakShownAt ?? 0) + 20 * 60); }}
+        onDismiss={() => setShowBreakOverlay(false)}
+      />
+
       {/* Session Title Header */}
       <div className="text-center mb-10">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider mb-3">
@@ -155,6 +188,10 @@ export default function FocusMode() {
         <h2 className="text-3xl font-extrabold text-white tracking-tight">
           {currentSession.task_name || 'Deep Focus Block'}
         </h2>
+        {/* Auto-detected session type */}
+        <div className={`inline-flex items-center gap-1.5 mt-2 text-xs font-bold ${sessionType.color}`}>
+          {sessionType.icon} {sessionType.label} Mode (auto-detected)
+        </div>
       </div>
 
       {/* Progress Ring and Quotes */}

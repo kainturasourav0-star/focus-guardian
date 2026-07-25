@@ -10,6 +10,7 @@ import Insights from './pages/Insights';
 import Goals from './pages/Goals';
 import History from './pages/History';
 import Settings from './pages/Settings';
+import Achievements from './pages/Achievements';
 import Login from './pages/Login';
 import { useSessionStore } from './store/useSessionStore';
 import { useGoalStore } from './store/useGoalStore';
@@ -17,6 +18,7 @@ import { useSettingsStore } from './store/useSettingsStore';
 import { useMonitorStore } from './store/useMonitorStore';
 import { useAuthStore } from './store/useAuthStore';
 import { useWebSocket } from './hooks/useWebSocket';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { DistractionNotification } from './components/ui/Notification';
 import { ToastContainer } from './components/ui/ToastContainer';
@@ -30,6 +32,8 @@ export default function App() {
 
   // Initialize WebSocket connection globally
   useWebSocket();
+  // Global keyboard shortcuts (Ctrl+Shift+F/B/P/R/A)
+  useKeyboardShortcuts();
 
   useEffect(() => {
     const initialize = async () => {
@@ -160,6 +164,7 @@ export default function App() {
               <Route path="/goals" element={<Goals />} />
               <Route path="/history" element={<History />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/achievements" element={<Achievements />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

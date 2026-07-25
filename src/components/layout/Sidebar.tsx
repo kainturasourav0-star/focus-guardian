@@ -12,6 +12,7 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
+  Medal,
 } from 'lucide-react';
 import { useMonitorStore } from '../../store/useMonitorStore';
 import GuardianAvatar from './GuardianAvatar';
@@ -22,6 +23,7 @@ const navItems = [
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/insights', label: 'AI Insights', icon: Sparkles },
   { path: '/goals', label: 'Goals', icon: Trophy },
+  { path: '/achievements', label: 'Achievements', icon: Medal },
   { path: '/history', label: 'History', icon: HistoryIcon },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
