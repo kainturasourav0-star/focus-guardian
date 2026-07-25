@@ -1,6 +1,5 @@
-import type { Config } from 'tailwindcss'
-
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   content: [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
@@ -37,7 +36,6 @@ const config: Config = {
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
         'gradient-focus': 'linear-gradient(135deg, #7c3aed, #06b6d4)',
         'gradient-card': 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.1))',
         'gradient-productive': 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,182,212,0.1))',
@@ -110,5 +108,3 @@ const config: Config = {
   },
   plugins: [],
 }
-
-export default config

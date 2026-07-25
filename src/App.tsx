@@ -16,6 +16,7 @@ import { useSettingsStore } from './store/useSettingsStore';
 import { useWebSocket } from './hooks/useWebSocket';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { DistractionNotification } from './components/ui/Notification';
+import { ToastContainer } from './components/ui/ToastContainer';
 
 export default function App() {
   const { fetchSessions } = useSessionStore();
@@ -45,7 +46,7 @@ export default function App() {
 
   if (booting) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center" style={{ background: '#0a0a0f' }}>
+      <div className="flex h-screen w-screen items-center justify-center" style={{ background: '#09090B' }}>
         <div className="text-center">
           <LoadingSpinner size="lg" message="Starting Focus Guardian..." />
         </div>
@@ -57,7 +58,7 @@ export default function App() {
     <BrowserRouter>
       <div
         className="flex h-screen w-screen flex-col overflow-hidden text-white selection:bg-purple-500/30"
-        style={{ background: '#0a0a0f' }}
+        style={{ background: '#09090B' }}
       >
         <TopBar />
         <div className="flex flex-1 overflow-hidden">
@@ -77,6 +78,7 @@ export default function App() {
         {/* Global overlays — always rendered regardless of route */}
         <DistractionNotification />
         <AICoachFloat />
+        <ToastContainer />
       </div>
     </BrowserRouter>
   );

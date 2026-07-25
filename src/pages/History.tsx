@@ -14,27 +14,27 @@ export default function History() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <header className="flex justify-between items-end mb-8">
+      <header className="flex justify-between items-end mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-white">Session History</h1>
-          <p className="text-gray-400 mt-1">Review your past focus sessions and productivity trends.</p>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">Session History</h1>
+          <p className="text-zinc-500 text-sm mt-1 font-medium">Review your past focus sessions, tracked durations, and scores.</p>
         </div>
-        <div className="flex bg-gray-900 rounded-lg p-1 border border-white/10">
+        <div className="flex bg-zinc-950 rounded-xl p-1 border border-white/5 shadow-sm">
           <button 
             onClick={() => setFilter('today')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${filter === 'today' ? 'bg-purple-500 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-300 cursor-pointer ${filter === 'today' ? 'bg-purple-500/10 text-purple-300 border border-purple-500/20' : 'text-zinc-400 hover:text-white border border-transparent'}`}
           >
             Today
           </button>
           <button 
             onClick={() => setFilter('week')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${filter === 'week' ? 'bg-purple-500 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-300 cursor-pointer ${filter === 'week' ? 'bg-purple-500/10 text-purple-300 border border-purple-500/20' : 'text-zinc-400 hover:text-white border border-transparent'}`}
           >
             This Week
           </button>
           <button 
             onClick={() => setFilter('all')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${filter === 'all' ? 'bg-purple-500 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-300 cursor-pointer ${filter === 'all' ? 'bg-purple-500/10 text-purple-300 border border-purple-500/20' : 'text-zinc-400 hover:text-white border border-transparent'}`}
           >
             All Time
           </button>
@@ -42,14 +42,16 @@ export default function History() {
       </header>
 
       {filteredSessions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center bg-gray-900/30 rounded-2xl border border-white/5">
-          <div className="h-16 w-16 bg-gray-800 rounded-full flex items-center justify-center mb-4">
-            <HistoryIcon className="h-8 w-8 text-gray-500" />
+        <div className="flex flex-col items-center justify-center py-20 text-center bg-zinc-900/30 rounded-2xl border border-white/5 max-w-md mx-auto">
+          <div className="h-16 w-16 bg-zinc-800 rounded-2xl flex items-center justify-center mb-4 border border-white/5">
+            <HistoryIcon className="h-7 w-7 text-zinc-500" />
           </div>
-          <h2 className="text-xl font-semibold text-white mb-2">No sessions yet</h2>
-          <p className="text-gray-400 mb-6">Start your first focus session to see it here.</p>
+          <h2 className="text-xl font-bold text-white mb-2 tracking-tight">No sessions recorded</h2>
+          <p className="text-zinc-500 text-sm mb-6 max-w-xs leading-relaxed">
+            Your completed focus periods will show up here. Take a break and start a focus session!
+          </p>
           <Link to="/focus">
-            <Button>Go to Focus Mode</Button>
+            <Button variant="primary">Go to Focus Mode</Button>
           </Link>
         </div>
       ) : (

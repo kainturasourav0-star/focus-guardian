@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Play, Square, Pause, PlayCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Square, Pause, RotateCcw, Target, ShieldAlert, Clock, Flame } from 'lucide-react';
 import ProgressRing from '../components/focus/ProgressRing';
 import MotivationalQuote from '../components/focus/MotivationalQuote';
 import { Button } from '../components/ui/Button';
@@ -9,63 +9,103 @@ import { useSessionStore } from '../store/useSessionStore';
 import { useMonitorStore } from '../store/useMonitorStore';
 
 export default function FocusMode() {
-  const { currentSession, startSession, endSession, elapsedSeconds, focusModeActive } = useSessionStore();
+  const { 
+    currentSession, 
+    startSession, 
+    endSession, 
+    elapsedSeconds, 
+    timerInterval,
+    tickTimer,
+    resetTimer
+  } = useSessionStore();
+  
   const { timeDistractedToday } = useMonitorStore();
   const [taskName, setTaskName] = useState('');
   const [isPaused, setIsPaused] = useState(false);
 
+  // Default pomodoro duration: 25 minutes
+  const targetSeconds = 25 * 60;
+
+  // Custom Pause/Resume local timer control
+  useEffect(() => {
+    let localInterval: ReturnType<typeof setInterval> | null = null;
+    
+    // If a session is active and NOT paused, we tick the timer every second
+    if (currentSession && !isPaused) {
+      localInterval = setInterval(() => {
+        tickTimer();
+      }, 1000);
+    }
+    
+    return () => {
+      if (localInterval) clearInterval(localInterval);
+    };
+  }, [currentSession, isPaused, tickTimer]);
+
   const handleStart = async (e: React.FormEvent) => {
     e.preventDefault();
-    await startSession(taskName || 'Focus Session');
+    await startSession(taskName || 'Deep Focus Session');
     setTaskName('');
     setIsPaused(false);
   };
 
   const handleEnd = async () => {
-    await endSession();
-    setTaskName('');
-    setIsPaused(false);
+    if (confirm('End this focus session? This will save your productivity score.')) {
+      await endSession();
+      setIsPaused(false);
+    }
   };
 
-  // 25-minute default target (from settings ideally)
-  const targetSeconds = 25 * 60;
+  const handleReset = () => {
+    if (confirm('Reset the focus timer? Your progress will restart.')) {
+      resetTimer();
+      setIsPaused(true);
+    }
+  };
 
   if (!currentSession) {
     return (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="focus-mode-bg h-full w-full rounded-2xl flex items-center justify-center p-6 border border-white/5"
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        className="max-w-md mx-auto mt-12"
       >
-        <GlassCard className="max-w-md w-full p-8 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-cyan-500" />
+        <GlassCard 
+          className="p-8 border border-white/5 shadow-2xl relative overflow-hidden group"
+          style={{ background: '#18181B' }}
+        >
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-purple-500 to-cyan-500" />
+          
           <div className="text-center mb-8">
-            <div className="text-5xl mb-4">🎯</div>
-            <h2 className="text-2xl font-bold text-white mb-2">Start a Focus Session</h2>
-            <p className="text-slate-400">Block distractions and track your time.</p>
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 text-2xl mb-4 font-bold">
+              🎯
+            </div>
+            <h2 className="text-2xl font-extrabold text-white tracking-tight">Focus Block</h2>
+            <p className="text-zinc-500 text-sm mt-1 font-semibold">Declare a task to initiate intelligent distraction guards.</p>
           </div>
 
           <form onSubmit={handleStart} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-2">
-                What are you working on?
+              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">
+                Active Goal / Task Name
               </label>
               <input
+                required
                 type="text"
                 value={taskName}
                 onChange={(e) => setTaskName(e.target.value)}
-                placeholder="e.g. Coding the frontend"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all placeholder:text-slate-600"
+                placeholder="e.g., Implementing Tailwind Fixes"
+                className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all placeholder:text-zinc-650"
               />
             </div>
             <Button
               type="submit"
               variant="primary"
               size="lg"
-              icon={<Play className="h-5 w-5" />}
-              className="w-full justify-center"
+              className="w-full justify-center py-3.5 shadow-lg shadow-purple-500/25"
             >
-              Start Focus
+              Start Focus Session
             </Button>
           </form>
         </GlassCard>
@@ -77,73 +117,102 @@ export default function FocusMode() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="focus-mode-bg h-full w-full rounded-2xl flex flex-col items-center justify-center p-6 border border-white/5 relative"
+      className="max-w-3xl mx-auto flex flex-col items-center justify-center p-6 min-h-[80vh] relative"
     >
-      {/* Task name header */}
-      <div className="absolute top-8 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-sm font-medium mb-3">
-          <span className="pulse-dot productive" />
-          Focus Session Active
+      {/* Session Title Header */}
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider mb-3">
+          <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />
+          Focusing
         </div>
-        <h2 className="text-2xl font-bold text-white">
-          {currentSession.task_name || 'Focus Session'}
+        <h2 className="text-3xl font-extrabold text-white tracking-tight">
+          {currentSession.task_name || 'Deep Focus Block'}
         </h2>
       </div>
 
-      {/* Progress ring + quote */}
-      <div className="flex flex-col items-center justify-center w-full max-w-2xl mt-12">
-        <ProgressRing elapsed={elapsedSeconds} target={targetSeconds} />
+      {/* Progress Ring and Quotes */}
+      <div className="flex flex-col items-center justify-center w-full">
+        <div className="relative">
+          <ProgressRing elapsed={elapsedSeconds} target={targetSeconds} />
+          {/* Subtle glow behind progress circle */}
+          <div className="absolute inset-0 rounded-full bg-purple-500/5 blur-3xl pointer-events-none" />
+        </div>
 
-        <div className="mt-12 w-full">
+        <div className="mt-10 w-full max-w-lg">
           <MotivationalQuote />
         </div>
 
-        {/* Controls */}
-        <div className="mt-16 flex items-center gap-6">
-          <button
-            onClick={() => setIsPaused(!isPaused)}
-            className="flex items-center justify-center w-14 h-14 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-white"
-            title={isPaused ? 'Resume' : 'Pause'}
-          >
-            {isPaused ? <PlayCircle className="h-6 w-6" /> : <Pause className="h-6 w-6" />}
-          </button>
+        {/* Unified premium controls grid */}
+        <div className="mt-12 flex items-center gap-4">
+          {/* Pause / Resume Button */}
+          {isPaused ? (
+            <Button
+              onClick={() => setIsPaused(false)}
+              variant="success"
+              size="lg"
+              icon={<Play size={16} />}
+              className="px-6 rounded-full"
+            >
+              Resume
+            </Button>
+          ) : (
+            <Button
+              onClick={() => setIsPaused(true)}
+              variant="secondary"
+              size="lg"
+              icon={<Pause size={16} />}
+              className="px-6 rounded-full"
+            >
+              Pause
+            </Button>
+          )}
 
+          {/* Reset Timer Button */}
+          <Button
+            onClick={handleReset}
+            variant="secondary"
+            size="lg"
+            icon={<RotateCcw size={16} />}
+            className="px-6 rounded-full border-white/5 bg-white/3 hover:bg-white/10"
+          >
+            Reset
+          </Button>
+
+          {/* Stop / End Session Button */}
           <Button
             onClick={handleEnd}
             variant="danger"
             size="lg"
-            icon={<Square className="h-4 w-4 fill-current" />}
-            className="px-8 rounded-full shadow-lg shadow-red-500/20"
+            icon={<Square size={14} className="fill-current" />}
+            className="px-6 rounded-full shadow-lg shadow-red-500/10"
           >
-            End Session
+            Stop
           </Button>
         </div>
       </div>
 
-      {/* Bottom stats */}
-      <div className="absolute bottom-8 flex gap-12">
+      {/* Bottom stats layout */}
+      <div className="mt-16 grid grid-cols-3 gap-8 w-full max-w-lg border-t border-white/5 pt-8">
         <div className="text-center">
-          <div className="text-2xl font-bold text-white">
-            {currentSession.distraction_count ?? 0}
-          </div>
-          <div className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-1">
+          <div className="text-3xl font-extrabold text-zinc-100">{currentSession.distraction_count ?? 0}</div>
+          <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
             Distractions
           </div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-purple-400">
+          <div className="text-3xl font-extrabold text-purple-400">
             {Math.floor(elapsedSeconds / 60)}
           </div>
-          <div className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-1">
-            Minutes Focused
+          <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+            Min Focused
           </div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-red-400">
+          <div className="text-3xl font-extrabold text-cyan-400">
             {Math.floor(timeDistractedToday)}
           </div>
-          <div className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-1">
-            Min Distracted Today
+          <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+            Distracted Today
           </div>
         </div>
       </div>

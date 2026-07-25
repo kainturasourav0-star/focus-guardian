@@ -12,9 +12,9 @@ interface Props {
 export default function ActiveAppBadge({ appName, classification, windowTitle }: Props) {
   const getColor = () => {
     switch (classification) {
-      case 'PRODUCTIVE': return 'bg-green-500';
-      case 'DISTRACTION': return 'bg-red-500';
-      default: return 'bg-yellow-500';
+      case 'PRODUCTIVE': return 'bg-emerald-500 shadow-[0_0_8px_#10b981]';
+      case 'DISTRACTION': return 'bg-red-500 shadow-[0_0_8px_#ef4444]';
+      default: return 'bg-amber-500 shadow-[0_0_8px_#f59e0b]';
     }
   };
 
@@ -29,23 +29,27 @@ export default function ActiveAppBadge({ appName, classification, windowTitle }:
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.2 }}
       >
-        <GlassCard className="p-5 flex flex-col gap-3">
+        <GlassCard 
+          className="p-6 flex flex-col gap-4 border border-white/5 shadow-lg relative overflow-hidden group hover:scale-[1.01] transition-all"
+          style={{ background: '#18181B' }}
+        >
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-400">Currently Active App</h3>
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">Active Application</h3>
             <div className="flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
+              <span className="relative flex h-2 w-2">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${getColor()}`}></span>
-                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${getColor()}`}></span>
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${getColor()}`}></span>
               </span>
               <Badge variant={getBadgeVariant()}>{classification}</Badge>
             </div>
           </div>
           
           <div>
-            <div className="text-lg font-bold text-white mb-1 truncate">{appName || 'System'}</div>
-            <div className="text-xs text-gray-500 truncate" title={windowTitle}>
-              {windowTitle.length > 50 ? windowTitle.substring(0, 50) + '...' : windowTitle || 'Background'}
+            <div className="text-xl font-bold text-white mb-1.5 truncate tracking-tight">{appName || 'System idle'}</div>
+            <div className="text-xs text-zinc-500 truncate leading-relaxed" title={windowTitle}>
+              {windowTitle.length > 50 ? windowTitle.substring(0, 50) + '...' : windowTitle || 'Monitoring background active windows'}
             </div>
           </div>
         </GlassCard>

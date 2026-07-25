@@ -1,0 +1,24 @@
+# Ignore all backend files
+backend/
+
+# Ignore electron files
+electron/
+dist-electron/
+
+# Ignore desktop release builds
+release/
+
+# Ignore local builds
+dist/
+
+# Ignore config and documentation
+*.md
+electron-builder.yml
+tsconfig.electron.json
+postcss.config.js
+tailwind.config.ts
+
+# Ignore standard folders
+node_modules/
+.git/
+.github/

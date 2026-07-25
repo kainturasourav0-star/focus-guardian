@@ -43,9 +43,9 @@ export default function Settings() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-white">Settings</h1>
-        <p className="text-slate-400 mt-1">Configure your focus environment and preferences.</p>
+      <header className="mb-6">
+        <h1 className="text-3xl font-extrabold text-white tracking-tight">Settings</h1>
+        <p className="text-zinc-500 text-sm mt-1 font-medium">Configure focus timer thresholds, warning blocks, and integrations.</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -73,15 +73,18 @@ export default function Settings() {
         </div>
       </div>
 
-      <GlassCard className="p-6 mt-8 border-red-500/20">
-        <h3 className="text-lg font-semibold text-white mb-2">Data & Privacy</h3>
-        <p className="text-slate-400 text-sm mb-4 max-w-2xl">
-          Your data is stored locally on your device. Clearing data will remove all focus history, goals, and reset settings to default. This action cannot be undone.
+      <GlassCard 
+        className="p-6 mt-8 border border-white/5 relative overflow-hidden group"
+        style={{ background: '#18181B' }}
+      >
+        <h3 className="text-base font-bold text-white tracking-tight mb-2">Data & Privacy</h3>
+        <p className="text-zinc-500 text-sm mb-4 max-w-2xl font-medium leading-relaxed">
+          Your data is stored locally in SQLite database (`focus_guardian.db`). Clearing data will permanently remove all focus history, goals, and reset preferences. This action cannot be undone.
         </p>
         <Button
           variant="danger"
           onClick={() => {
-            if (confirm('Are you sure you want to delete all data? This cannot be undone.')) {
+            if (confirm('Are you sure you want to delete all local data? This action is permanent and cannot be undone.')) {
               // Action handler if applicable
             }
           }}

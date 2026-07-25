@@ -41,14 +41,27 @@ export default function Insights() {
     fetchInsights();
   }, [settings?.gemini_api_key]);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.08 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 25 } }
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <header className="mb-8 flex justify-between items-end">
+      <header className="mb-6 flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <Sparkles className="h-8 w-8 text-purple-400" /> AI Insights
+          <h1 className="text-3xl font-extrabold text-white flex items-center gap-2.5 tracking-tight">
+            <Sparkles className="h-7 w-7 text-purple-400" /> AI Insights
           </h1>
-          <p className="text-gray-400 mt-1">Personalized productivity analysis powered by Gemini AI.</p>
+          <p className="text-zinc-500 text-sm mt-1 font-medium">Personalized productivity analysis powered by Gemini AI.</p>
         </div>
         <Button onClick={fetchInsights} disabled={loading} variant="secondary" className="flex items-center gap-2">
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Regenerate
@@ -56,43 +69,63 @@ export default function Insights() {
       </header>
 
       {error ? (
-        <GlassCard className="p-8 border-l-4 border-l-orange-500 bg-orange-500/5">
+        <GlassCard 
+          className="p-8 border-l-4 border-l-amber-500 bg-amber-500/5 border border-white/5" 
+          style={{ background: '#18181B' }}
+        >
           <div className="flex items-start gap-4">
-            <AlertCircle className="h-6 w-6 text-orange-400 shrink-0" />
+            <AlertCircle className="h-6 w-6 text-amber-400 shrink-0" />
             <div>
-              <h3 className="text-lg font-semibold text-white">Insights Unavailable</h3>
-              <p className="text-gray-400 mt-2">Insights require the Gemini API to be configured. Please add your API key in the Settings page to enable AI-powered analysis.</p>
+              <h3 className="text-lg font-bold text-white tracking-tight">Insights Config Required</h3>
+              <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
+                Insights require a Gemini API key. Add your key in the Settings page to unlock automated, custom productivity reports.
+              </p>
             </div>
           </div>
         </GlassCard>
       ) : loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <GlassCard key={i} className="p-6 h-24 relative overflow-hidden">
+            <GlassCard 
+              key={i} 
+              className="p-6 h-28 relative overflow-hidden border border-white/5"
+              style={{ background: '#18181B' }}
+            >
+              {/* Skeleton loading shimmer */}
               <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+              <div className="h-4 w-1/3 bg-white/5 rounded mb-4" />
+              <div className="h-4 w-2/3 bg-white/5 rounded" />
             </GlassCard>
           ))}
         </div>
       ) : (
-        <div className="space-y-4">
-          {insights.map((insight, i) => (
-            <motion.div
-              key={insight.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <GlassCard className="p-6 border-l-4 border-l-purple-500 hover:bg-white/5 transition-colors">
-                <div className="flex gap-4">
-                  <div className="mt-1">
-                    {insight.type === 'recommendation' ? <Lightbulb className="h-6 w-6 text-yellow-400" /> : <Sparkles className="h-6 w-6 text-purple-400" />}
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="space-y-4"
+        >
+          {insights.map((insight) => (
+            <motion.div key={insight.id} variants={itemVariants}>
+              <GlassCard 
+                className="p-6 border border-white/5 border-l-4 border-l-purple-500 hover:scale-[1.01] transition-transform shadow-md"
+                style={{ background: '#18181B' }}
+              >
+                <div className="flex gap-4 items-start">
+                  <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/10 mt-0.5">
+                    {insight.type === 'recommendation' ? <Lightbulb className="h-5 w-5 text-amber-400" /> : <Sparkles className="h-5 w-5 text-purple-400" />}
                   </div>
-                  <p className="text-gray-200 text-lg leading-relaxed">{insight.text}</p>
+                  <div className="flex-1">
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">
+                      {insight.type}
+                    </span>
+                    <p className="text-zinc-200 text-base leading-relaxed">{insight.text}</p>
+                  </div>
                 </div>
               </GlassCard>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );
