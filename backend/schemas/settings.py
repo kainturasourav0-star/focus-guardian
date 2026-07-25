@@ -11,6 +11,7 @@ class UserSettingsBase(BaseModel):
     allowed_apps: List[str] = []
     blocked_websites: List[str] = ["instagram.com", "facebook.com", "netflix.com", "tiktok.com"]
     gemini_api_key: Optional[str] = None
+    ai_coach_tone: Optional[str] = "motivational"
 
 class UserSettingsUpdate(BaseModel):
     warning_threshold_minutes: Optional[int] = None
@@ -22,6 +23,7 @@ class UserSettingsUpdate(BaseModel):
     allowed_apps: Optional[List[str]] = None
     blocked_websites: Optional[List[str]] = None
     gemini_api_key: Optional[str] = None
+    ai_coach_tone: Optional[str] = None
 
 class UserSettingsResponse(UserSettingsBase):
     model_config = ConfigDict(from_attributes=True)

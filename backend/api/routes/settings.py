@@ -32,7 +32,8 @@ def get_settings(db: Session = Depends(get_database)):
         "notifications_enabled": settings.notifications_enabled,
         "allowed_apps": json.loads(settings.allowed_apps) if settings.allowed_apps else [],
         "blocked_websites": json.loads(settings.blocked_websites) if settings.blocked_websites else [],
-        "gemini_api_key": settings.gemini_api_key
+        "gemini_api_key": settings.gemini_api_key,
+        "ai_coach_tone": settings.ai_coach_tone
     }
     return UserSettingsResponse(**settings_dict)
 
@@ -63,6 +64,7 @@ def update_settings(settings_in: UserSettingsUpdate, db: Session = Depends(get_d
         "notifications_enabled": settings.notifications_enabled,
         "allowed_apps": json.loads(settings.allowed_apps) if settings.allowed_apps else [],
         "blocked_websites": json.loads(settings.blocked_websites) if settings.blocked_websites else [],
-        "gemini_api_key": settings.gemini_api_key
+        "gemini_api_key": settings.gemini_api_key,
+        "ai_coach_tone": settings.ai_coach_tone
     }
     return UserSettingsResponse(**settings_dict)

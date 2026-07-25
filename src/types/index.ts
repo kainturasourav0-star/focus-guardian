@@ -72,6 +72,7 @@ export interface UserSettings {
   allowed_apps: string[]
   blocked_websites: string[]
   gemini_api_key: string | null
+  ai_coach_tone?: 'motivational' | 'brutal' | 'calm'
 }
 
 // ── Analytics ─────────────────────────────────────────────────────────────────

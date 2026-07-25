@@ -169,7 +169,7 @@ class MonitorService:
                     for log in recent_logs
                 ]
                 
-                msg = await get_coaching_message_async(recent_activities, settings.gemini_api_key)
+                msg = await get_coaching_message_async(recent_activities, settings.gemini_api_key, getattr(settings, "ai_coach_tone", "motivational"))
                 await self._broadcast("coach_message", msg)
 
     def stop(self):

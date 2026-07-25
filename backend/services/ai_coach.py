@@ -25,7 +25,7 @@ STATIC_TIPS = [
     "Let's get back to the zone!"
 ]
 
-async def get_coaching_message_async(recent_activities: list[dict], api_key: str) -> str:
+async def get_coaching_message_async(recent_activities: list[dict], api_key: str, tone: str = "motivational") -> str:
     if not api_key:
         import os
         api_key = os.getenv("GEMINI_API_KEY")
@@ -33,12 +33,19 @@ async def get_coaching_message_async(recent_activities: list[dict], api_key: str
         return random.choice(STATIC_TIPS)
         
     apps = ", ".join([f"{a['app_name']} ({a['classification']})" for a in recent_activities])
+    
+    tone_instruction = "Do not be judgmental or harsh. Be motivating."
+    if tone == "brutal":
+        tone_instruction = "Be sarcastic, dry, and slightly brutal. Roast the user's lack of discipline. Keep it witty, funny, and under 15 words."
+    elif tone == "calm":
+        tone_instruction = "Be gentle, calming, and mindful. Suggest taking a deep breath or doing a simple stretch."
+        
     prompt = f"""
-    You are a highly supportive, concise productivity coach.
+    You are a highly concise productivity coach.
     The user has been distracted recently. Recent apps used: {apps}.
     
-    Provide exactly one short sentence of encouragement to get them back on track.
-    Do not be judgmental or harsh. Be motivating.
+    Provide exactly one short sentence of advice to get them back on track.
+    Style: {tone_instruction}
     """
 
     try:

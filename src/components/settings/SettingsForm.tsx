@@ -70,6 +70,20 @@ export default function SettingsForm({ settings, onSave }: Props) {
               <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.dark_mode ? 'transform translate-x-4' : ''}`}></div>
             </div>
           </label>
+          
+          <div className="flex flex-col gap-1.5 pt-2">
+            <span className="text-sm font-medium text-slate-300">AI Coach Persona / Tone</span>
+            <select
+              name="ai_coach_tone"
+              value={formData.ai_coach_tone || 'motivational'}
+              onChange={(e) => setFormData(prev => ({ ...prev, ai_coach_tone: e.target.value as any }))}
+              className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+            >
+              <option value="motivational">🌟 Motivational & Supportive</option>
+              <option value="brutal">🔥 Brutal & Sarcastic (Strict)</option>
+              <option value="calm">🧘 Calming & Mindful</option>
+            </select>
+          </div>
         </div>
       </section>
 

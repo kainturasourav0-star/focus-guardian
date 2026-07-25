@@ -69,7 +69,8 @@ export default function App() {
       notifications_enabled: true,
       allowed_apps: ['VS Code', 'Terminal'],
       blocked_websites: ['instagram.com', 'facebook.com'],
-      gemini_api_key: null
+      gemini_api_key: null,
+      ai_coach_tone: 'motivational'
     });
 
     useGoalStore.setState({
