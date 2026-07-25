@@ -15,7 +15,6 @@ dist/
 *.md
 electron-builder.yml
 tsconfig.electron.json
-postcss.config.js
 tailwind.config.ts
 
 # Ignore standard folders
