@@ -27,6 +27,9 @@ async def generate_insights_async(target_date: date, db: Session, api_key: str) 
         fallback_insights.append(f"Your most used app was {top_app['app_name']}.")
 
     if not api_key:
+        import os
+        api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
         return fallback_insights
         
     prompt = f"""

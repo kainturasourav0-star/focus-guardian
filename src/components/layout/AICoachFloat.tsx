@@ -70,7 +70,7 @@ export default function AICoachFloat() {
         whileHover={{ scale: 1.05, y: -2 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setExpanded(!expanded)}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-cyan-500 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 ring-1 ring-white/10 transition-shadow"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-cyan-500 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 ring-1 ring-white/10 transition-shadow animate-float"
       >
         {expanded ? (
           <X className="h-6 w-6 text-white" />

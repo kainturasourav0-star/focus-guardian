@@ -27,6 +27,9 @@ STATIC_TIPS = [
 
 async def get_coaching_message_async(recent_activities: list[dict], api_key: str) -> str:
     if not api_key:
+        import os
+        api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
         return random.choice(STATIC_TIPS)
         
     apps = ", ".join([f"{a['app_name']} ({a['classification']})" for a in recent_activities])

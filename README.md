@@ -99,6 +99,40 @@ Windows OS → pygetwindow → AI Classifier → ActivityLog DB
 
 ---
 
+## 🔍 How It Works (System Deep Dive)
+
+Focus Guardian is built as a hybrid desktop utility combining native OS hooks, an asynchronous local web services layer, and a hardware-accelerated React interface. Here is how each subsystem executes under the hood:
+
+### 1. Native Activity Monitoring (`System Monitor`)
+- **Active Window Polling:** The FastAPI background worker spawns a persistent polling loop that queries the operating system every **3 seconds** for the active window's reference.
+- **Process Identification:**
+  - On **Windows**, it uses `pygetwindow` to locate the foreground handler and extracts the title bar string.
+  - On **macOS**, it relies on a Cocoa application handler to fetch active process descriptors.
+- **Title Parsing:** The monitor breaks down window title structures (e.g., `Document Name - Microsoft Word` or `Tab Name · Website - Google Chrome`) to extract the application name (`Word`, `Chrome`) and the dynamic context title.
+
+### 2. Context-Aware AI Classification (`AI Engine`)
+- **Local Rule Engine (Fast Path):** To prevent network delays, the monitor first evaluates the window data against a regex list of keywords (e.g., development environments, communication apps, social platforms).
+- **Gemini AI Classification (Deep Path):** If the classification is ambiguous (e.g., a browser tab with a generic title), the app dispatches the metadata to the **Gemini 1.5 Flash API**.
+- **Education vs. Distraction Resolution:** The classifier uses structural prompt instructions to understand context. For example:
+  - `youtube.com/watch?v=PythonTutorial` is categorized as **PRODUCTIVE** (`Study`).
+  - `youtube.com/watch?v=GamingStream` is categorized as **DISTRACTION** (`Entertainment`).
+- **LRU Cache Layer:** All classified results are stored in an in-memory `ClassifierCache` (up to 200 items) to prevent redundant API calls for recurring window title shifts.
+
+### 3. Smart Intervention & Logging
+- **Distraction Tracker:** When the active window is classified as a `DISTRACTION`, a monotonic stopwatch starts. If the distraction duration exceeds the configured threshold (default: 5 minutes), the backend triggers a WebSocket broadcast.
+- **Desktop Alerts:** The Electron main process intercepts this event and displays a custom floating notification with interactive action buttons:
+  - **Return to Work:** Dismisses the alert and brings focus back to productive windows.
+  - **Snooze:** Suppresses the warning for a short duration.
+  - **Ignore:** Dismisses the prompt and logs the choice.
+- **Intervention DB Logging:** Every button click dispatches an event to the backend and records a structured row in the SQLite `intervention_logs` table for long-term willpower analytics.
+
+### 4. Floating AI Coach & Live Advice
+- **Activity Context Analysis:** If a focus session is active, the app counts window switches. If the user context-switches frequently (e.g., more than 6 times in a short interval) or if a focus block runs long without a break, the coach triggers.
+- **Asynchronous Prompting:** An asynchronous worker thread sends the recent activity trace to the Gemini model to synthesize a supportive, non-judgmental prompt (e.g., *"You've switched apps 8 times recently, let's take a deep breath and close our messaging tabs!"*).
+- **WebSocket Broadcast:** The message is pushed over the live socket and rendered inside the floating React coach bubble.
+
+---
+
 ## 📁 Project Structure
 
 ```

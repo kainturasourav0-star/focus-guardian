@@ -15,6 +15,9 @@ from backend.services.rule_classifier import classify as rule_classify
 
 async def classify_async(app_name: str, window_title: str, api_key: str) -> dict:
     if not api_key:
+        import os
+        api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
         return rule_classify(app_name, window_title)
 
     prompt = f"""Analyze the following active window:
