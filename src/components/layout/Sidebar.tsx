@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useMonitorStore } from '../../store/useMonitorStore';
+import GuardianAvatar from './GuardianAvatar';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -96,6 +97,9 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Focus Guardian Avatar */}
+      <GuardianAvatar isCollapsed={isCollapsed} />
 
       {/* Collapse Toggle Switch Button */}
       <button
