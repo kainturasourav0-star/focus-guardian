@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trophy } from 'lucide-react';
+import { Plus, Trophy, Sparkles } from 'lucide-react';
 import GoalCard from '../components/goals/GoalCard';
 import GoalForm from '../components/goals/GoalForm';
+import AIGoalPlanner from '../components/goals/AIGoalPlanner';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { useGoalStore } from '../store/useGoalStore';
@@ -10,6 +11,7 @@ import { useGoalStore } from '../store/useGoalStore';
 export default function Goals() {
   const { goals, createGoal } = useGoalStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPlannerOpen, setIsPlannerOpen] = useState(false);
 
   const activeGoals = goals.filter((g) => !g.completed);
   const completedGoals = goals.filter((g) => g.completed);
@@ -39,9 +41,14 @@ export default function Goals() {
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Goals</h1>
           <p className="text-zinc-500 text-sm mt-1 font-medium">Set focus hour targets and track your long-term study milestones.</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2" variant="primary">
-          <Plus className="h-4 w-4" /> Add Goal
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={() => setIsPlannerOpen(true)} className="flex items-center gap-2 border-white/10 bg-white/5 hover:bg-white/10 text-purple-300" variant="secondary">
+            <Sparkles className="h-4 w-4 text-purple-400" /> AI Planner
+          </Button>
+          <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2" variant="primary">
+            <Plus className="h-4 w-4" /> Add Goal
+          </Button>
+        </div>
       </header>
 
       {goals.length === 0 ? (
@@ -108,6 +115,10 @@ export default function Goals() {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create New Goal">
         <GoalForm onSubmit={handleAddGoal} onCancel={() => setIsModalOpen(false)} />
+      </Modal>
+
+      <Modal isOpen={isPlannerOpen} onClose={() => setIsPlannerOpen(false)} title="AI Goal Planner">
+        <AIGoalPlanner />
       </Modal>
     </div>
   );
