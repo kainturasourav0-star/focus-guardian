@@ -15,9 +15,20 @@ export default defineConfig({
   server: {
     port: 5173,
   },
-  base: './',
+  base: '/',
   build: {
     outDir: 'dist',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          motion: ['framer-motion'],
+          charts: ['recharts'],
+          ui: ['lucide-react', 'clsx'],
+        },
+      },
+    },
   },
 })
