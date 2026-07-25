@@ -11,6 +11,7 @@ from backend.services.idle import idle_detector
 from backend.models.settings import UserSettings
 from backend.models.activity import ActivityLog
 from backend.services.analytics import AnalyticsEngine
+from backend.services.ai_coach import get_coaching_message_async
 
 class MonitorService:
     def __init__(self):
@@ -20,6 +21,8 @@ class MonitorService:
         self._distraction_start = None
         self._active_session_id = None
         self._connected_clients = set()
+        self._last_coach_time = datetime.now(timezone.utc)
+        self._app_switch_count = 0
         
         if sys.platform == 'win32':
             self.adapter = WindowsAdapter()
@@ -87,6 +90,11 @@ class MonitorService:
         now = datetime.now(timezone.utc)
         duration = int((now - self._last_window_time).total_seconds())
         self._last_window_time = now
+        
+        # Count app switches
+        if self._last_window and self._last_window.app_name != window.app_name:
+            self._app_switch_count += 1
+            
         self._last_window = window
         
         # Check cache
@@ -110,11 +118,22 @@ class MonitorService:
         db.add(log_entry)
         db.commit()
         
-        # Broadcast current activity
-        await self._broadcast("current_activity", {
+        # Compute productivity score dynamically
+        score = 0
+        if self._active_session_id:
+            score = AnalyticsEngine.compute_productivity_score(self._active_session_id, db)
+        else:
+            today_stats = AnalyticsEngine.get_daily_stats(now.date(), db)
+            score = today_stats.get("productivity_score", 0)
+
+        # Broadcast current activity (using activity_update to match frontend expectations)
+        await self._broadcast("activity_update", {
             "app_name": window.app_name,
             "window_title": window.window_title,
-            "classification": classification['classification']
+            "classification": classification['classification'],
+            "confidence": classification.get('confidence', 1.0),
+            "productivity_score": score,
+            "source": classification.get('source', 'rule_fallback')
         })
         
         # Distraction threshold logic
@@ -125,11 +144,33 @@ class MonitorService:
                 distraction_mins = (now - self._distraction_start).total_seconds() / 60.0
                 if distraction_mins >= settings.warning_threshold_minutes:
                     await self._broadcast("distraction_alert", {
-                        "minutes": round(distraction_mins, 1),
-                        "app": window.app_name
+                        "app_name": window.app_name,
+                        "window_title": window.window_title,
+                        "minutes_on_distraction": round(distraction_mins, 1),
+                        "threshold_minutes": settings.warning_threshold_minutes
                     })
         else:
             self._distraction_start = None
+
+        # Periodically trigger AI Coach message (after 6 switches or 120s of active session)
+        if self._active_session_id:
+            time_since_coach = (now - self._last_coach_time).total_seconds()
+            if self._app_switch_count >= 6 or time_since_coach >= 120:
+                self._app_switch_count = 0
+                self._last_coach_time = now
+                
+                # Retrieve last 10 activities for context
+                recent_logs = db.query(ActivityLog).filter(
+                    ActivityLog.session_id == self._active_session_id
+                ).order_by(ActivityLog.timestamp.desc()).limit(10).all()
+                
+                recent_activities = [
+                    {"app_name": log.app_name, "classification": log.classification}
+                    for log in recent_logs
+                ]
+                
+                msg = await get_coaching_message_async(recent_activities, settings.gemini_api_key)
+                await self._broadcast("coach_message", msg)
 
     def stop(self):
         self._running = False

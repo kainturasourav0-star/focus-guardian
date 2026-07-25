@@ -4,6 +4,7 @@ import { Sparkles, Lightbulb, RefreshCw, AlertCircle } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { insightsApi } from '../services/api';
 
 interface Insight {
   id: string;
@@ -17,24 +18,49 @@ export default function Insights() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const fetchInsights = () => {
+  const fetchInsights = async () => {
     setLoading(true);
     setError(false);
     
-    setTimeout(() => {
-      if (!settings?.gemini_api_key) {
-        setError(true);
-        setLoading(false);
-        return;
-      }
+    try {
+      const res = await insightsApi.get();
+      const rawInsights: string[] = res.data;
       
-      setInsights([
-        { id: '1', text: 'You are 40% more productive on Tuesdays mornings between 9am and 11am. Consider scheduling deep work then.', type: 'pattern' },
-        { id: '2', text: 'Discord usage frequently triggers 20+ minute distraction chains. Try enabling stricter blocks during focus sessions.', type: 'recommendation' },
-        { id: '3', text: 'Great job! Your focus streak has improved by 2 days compared to last week.', type: 'achievement' },
-      ]);
+      const formatted = rawInsights.map((text, idx) => {
+        const lower = text.toLowerCase();
+        let type: 'pattern' | 'recommendation' | 'achievement' = 'pattern';
+        if (
+          lower.includes('score') ||
+          lower.includes('streak') ||
+          lower.includes('completed') ||
+          lower.includes('great') ||
+          lower.includes('achievement')
+        ) {
+          type = 'achievement';
+        } else if (
+          lower.includes('try') ||
+          lower.includes('consider') ||
+          lower.includes('suggest') ||
+          lower.includes('recommend') ||
+          lower.includes('should') ||
+          lower.includes('limit') ||
+          lower.includes('enable')
+        ) {
+          type = 'recommendation';
+        }
+        return {
+          id: String(idx),
+          text,
+          type,
+        };
+      });
+      setInsights(formatted);
+    } catch (err) {
+      console.error('Failed to fetch AI insights:', err);
+      setError(true);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   useEffect(() => {
@@ -68,17 +94,34 @@ export default function Insights() {
         </Button>
       </header>
 
-      {error ? (
+      {!settings?.gemini_api_key && (
         <GlassCard 
-          className="p-8 border-l-4 border-l-amber-500 bg-amber-500/5 border border-white/5" 
+          className="p-6 border-l-4 border-l-amber-500 bg-amber-500/5 border border-white/5" 
           style={{ background: '#18181B' }}
         >
           <div className="flex items-start gap-4">
-            <AlertCircle className="h-6 w-6 text-amber-400 shrink-0" />
+            <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">Insights Config Required</h3>
+              <h4 className="text-sm font-bold text-white tracking-tight">Gemini Key Missing</h4>
+              <p className="text-zinc-400 text-xs mt-1 leading-relaxed">
+                Using local rule-based insights. Add your Gemini API key in Settings to unlock deep, personalized AI coaching reports.
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+      )}
+
+      {error ? (
+        <GlassCard 
+          className="p-8 border-l-4 border-l-red-500 bg-red-500/5 border border-white/5" 
+          style={{ background: '#18181B' }}
+        >
+          <div className="flex items-start gap-4">
+            <AlertCircle className="h-6 w-6 text-red-400 shrink-0" />
+            <div>
+              <h3 className="text-lg font-bold text-white tracking-tight">Failed to load insights</h3>
               <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
-                Insights require a Gemini API key. Add your key in the Settings page to unlock automated, custom productivity reports.
+                Please make sure the Focus Guardian backend is running and healthy.
               </p>
             </div>
           </div>

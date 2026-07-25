@@ -1,21 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { analyticsApi } from '../../services/api';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 
 export default function WeeklyScoreChart() {
   const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const mockData = [
-      { name: 'Mon', score: 65 },
-      { name: 'Tue', score: 72 },
-      { name: 'Wed', score: 85 },
-      { name: 'Thu', score: 78 },
-      { name: 'Fri', score: 92 },
-      { name: 'Sat', score: 55 },
-      { name: 'Sun', score: 60 },
-    ];
-    setData(mockData);
+    const fetchData = async () => {
+      try {
+        const res = await analyticsApi.weekly();
+        const stats = res.data;
+        const formatted = stats.map((d: any) => {
+          const dateObj = new Date(d.date);
+          const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+          return {
+            name: dayName,
+            score: d.productivity_score,
+          };
+        });
+        setData(formatted);
+      } catch (err) {
+        console.error('Failed to fetch weekly score data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[200px] w-full flex items-center justify-center">
+        <LoadingSpinner size="sm" />
+      </div>
+    );
+  }
 
   return (
     <div className="h-[200px] w-full mt-2">

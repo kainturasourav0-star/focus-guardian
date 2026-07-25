@@ -1,5 +1,16 @@
-import google.generativeai as genai
+import asyncio
 import random
+
+try:
+    from google import genai as google_genai
+    USE_NEW_SDK = True
+except ImportError:
+    try:
+        import google.generativeai as genai_legacy
+        USE_NEW_SDK = False
+    except ImportError:
+        USE_NEW_SDK = False
+        genai_legacy = None
 
 STATIC_TIPS = [
     "Take a deep breath and gently return your focus.",
@@ -14,26 +25,47 @@ STATIC_TIPS = [
     "Let's get back to the zone!"
 ]
 
-def get_coaching_message(recent_activities: list[dict], api_key: str) -> str:
+async def get_coaching_message_async(recent_activities: list[dict], api_key: str) -> str:
     if not api_key:
         return random.choice(STATIC_TIPS)
         
+    apps = ", ".join([f"{a['app_name']} ({a['classification']})" for a in recent_activities])
+    prompt = f"""
+    You are a highly supportive, concise productivity coach.
+    The user has been distracted recently. Recent apps used: {apps}.
+    
+    Provide exactly one short sentence of encouragement to get them back on track.
+    Do not be judgmental or harsh. Be motivating.
+    """
+
     try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        loop = asyncio.get_event_loop()
         
-        apps = ", ".join([f"{a['app_name']} ({a['classification']})" for a in recent_activities])
-        
-        prompt = f"""
-        You are a highly supportive, concise productivity coach.
-        The user has been distracted recently. Recent apps used: {apps}.
-        
-        Provide exactly one short sentence of encouragement to get them back on track.
-        Do not be judgmental or harsh. Be motivating.
-        """
-        
-        response = model.generate_content(prompt)
-        text = response.text.strip()
+        if USE_NEW_SDK:
+            client = google_genai.Client(api_key=api_key)
+            response = await asyncio.wait_for(
+                loop.run_in_executor(
+                    None,
+                    lambda: client.models.generate_content(
+                        model="gemini-2.0-flash",
+                        contents=prompt,
+                    )
+                ),
+                timeout=8.0
+            )
+            text = response.text
+        else:
+            if genai_legacy is None:
+                return random.choice(STATIC_TIPS)
+            genai_legacy.configure(api_key=api_key)
+            model = genai_legacy.GenerativeModel('gemini-1.5-flash')
+            response = await asyncio.wait_for(
+                loop.run_in_executor(None, lambda: model.generate_content(prompt)),
+                timeout=8.0
+            )
+            text = response.text
+            
+        text = text.strip()
         if text:
             return text
             

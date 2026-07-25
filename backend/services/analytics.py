@@ -62,12 +62,29 @@ class AnalyticsEngine:
 
     @staticmethod
     def get_heatmap_data(db: Session) -> list[dict]:
-        # simplified placeholder implementation
-        # return grid of hour (0-23) x day (0-6)
+        # Get logs from last 30 days
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        logs = db.query(ActivityLog).filter(
+            ActivityLog.timestamp >= thirty_days_ago,
+            ActivityLog.classification == 'PRODUCTIVE'
+        ).all()
+        
+        # Initialize grid (0 = Mon, ..., 6 = Sun)
+        grid = {d: {h: 0.0 for h in range(24)} for d in range(7)}
+        
+        for log in logs:
+            dt = log.timestamp
+            # Ensure it is timezone-aware if comparing or processing
+            day = dt.weekday() # 0-6 (Mon-Sun)
+            hour = dt.hour
+            grid[day][hour] += log.duration_seconds
+            
         data = []
         for day in range(7):
             for hour in range(24):
-                data.append({"hour": hour, "day": day, "value": 0.0})
+                # Convert duration_seconds to minutes
+                val = round(grid[day][hour] / 60.0, 1)
+                data.append({"hour": hour, "day": day, "value": val})
         return data
 
     @staticmethod

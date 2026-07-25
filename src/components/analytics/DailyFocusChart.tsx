@@ -1,22 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { analyticsApi } from '../../services/api';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 
 export default function DailyFocusChart() {
   const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock data for weekly API call
-    const mockData = [
-      { name: 'Mon', focus: 120, distraction: 40 },
-      { name: 'Tue', focus: 150, distraction: 30 },
-      { name: 'Wed', focus: 180, distraction: 20 },
-      { name: 'Thu', focus: 90, distraction: 60 },
-      { name: 'Fri', focus: 200, distraction: 25 },
-      { name: 'Sat', focus: 60, distraction: 80 },
-      { name: 'Sun', focus: 45, distraction: 90 },
-    ];
-    setData(mockData);
+    const fetchData = async () => {
+      try {
+        const res = await analyticsApi.weekly();
+        const stats = res.data;
+        const formatted = stats.map((d: any) => {
+          const dateObj = new Date(d.date);
+          const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+          return {
+            name: dayName,
+            focus: d.focus_minutes,
+            distraction: d.distraction_minutes,
+          };
+        });
+        setData(formatted);
+      } catch (err) {
+        console.error('Failed to fetch weekly focus data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[220px] w-full flex items-center justify-center">
+        <LoadingSpinner size="sm" />
+      </div>
+    );
+  }
 
   return (
     <div className="h-[220px] w-full">

@@ -25,4 +25,9 @@ def get_db():
 
 def init_db():
     """Create all tables on startup."""
+    from backend.models.session import FocusSession
+    from backend.models.activity import ActivityLog
+    from backend.models.goal import Goal
+    from backend.models.settings import UserSettings
+    from backend.models.intervention import InterventionLog
     Base.metadata.create_all(bind=engine)
