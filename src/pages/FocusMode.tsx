@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Square, Pause, RotateCcw, Target, ShieldAlert, Clock, Flame } from 'lucide-react';
+import { Play, Square, Pause, RotateCcw, Target, ShieldAlert, Clock, Flame, Volume2 } from 'lucide-react';
 import ProgressRing from '../components/focus/ProgressRing';
 import MotivationalQuote from '../components/focus/MotivationalQuote';
 import { Button } from '../components/ui/Button';
@@ -22,6 +22,33 @@ export default function FocusMode() {
   const { timeDistractedToday } = useMonitorStore();
   const [taskName, setTaskName] = useState('');
   const [isPaused, setIsPaused] = useState(false);
+  const [activeSound, setActiveSound] = useState('None');
+
+  const handleToggleSound = (sound: string) => {
+    const player = document.getElementById('ambient-audio-player') as HTMLAudioElement;
+    if (!player) return;
+
+    if (sound === 'None') {
+      player.pause();
+      setActiveSound('None');
+    } else {
+      let src = '';
+      if (sound === 'Rain') src = 'https://www.soundjay.com/nature/sounds/rain-07.mp3';
+      if (sound === 'Lofi') src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3';
+      if (sound === 'Forest') src = 'https://www.soundjay.com/nature/sounds/forest-wind-1.mp3';
+      
+      player.src = src;
+      player.play().catch(err => console.error("Audio playback blocked", err));
+      setActiveSound(sound);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      const player = document.getElementById('ambient-audio-player') as HTMLAudioElement;
+      if (player) player.pause();
+    };
+  }, [currentSession]);
 
   // Default pomodoro duration: 25 minutes
   const targetSeconds = 25 * 60;
@@ -141,6 +168,36 @@ export default function FocusMode() {
         <div className="mt-10 w-full max-w-lg">
           <MotivationalQuote />
         </div>
+
+        {/* Ambient Sound Controller */}
+        <GlassCard 
+          className="mt-8 p-4 border border-white/5 flex flex-col md:flex-row items-center gap-4 w-full max-w-lg shadow-xl"
+          style={{ background: '#121215' }}
+        >
+          <div className="flex items-center gap-2">
+            <Volume2 className="h-4 w-4 text-purple-400" />
+            <span className="text-xs font-bold text-zinc-350 uppercase tracking-widest">Ambient Audio</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5 flex-1 justify-center md:justify-end">
+            {['None', 'Rain', 'Lofi', 'Forest'].map((sound) => (
+              <button
+                key={sound}
+                onClick={() => handleToggleSound(sound)}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                  activeSound === sound
+                    ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/25'
+                    : 'bg-zinc-950 border-white/5 text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {sound === 'None' && '🔇 None'}
+                {sound === 'Rain' && '🌧️ Rain'}
+                {sound === 'Lofi' && '🎵 Lofi Beats'}
+                {sound === 'Forest' && '🌲 Forest'}
+              </button>
+            ))}
+          </div>
+          <audio id="ambient-audio-player" loop />
+        </GlassCard>
 
         {/* Unified premium controls grid */}
         <div className="mt-12 flex items-center gap-4">
