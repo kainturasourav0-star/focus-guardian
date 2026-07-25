@@ -32,8 +32,6 @@ export default function App() {
 
   // Initialize WebSocket connection globally
   useWebSocket();
-  // Global keyboard shortcuts (Ctrl+Shift+F/B/P/R/A)
-  useKeyboardShortcuts();
 
   useEffect(() => {
     const initialize = async () => {
@@ -152,28 +150,40 @@ export default function App() {
         className="flex h-screen w-screen flex-col overflow-hidden text-white selection:bg-purple-500/30"
         style={{ background: '#09090B' }}
       >
-        <TopBar />
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto p-6">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/focus" element={<FocusMode />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/insights" element={<Insights />} />
-              <Route path="/goals" element={<Goals />} />
-              <Route path="/history" element={<History />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/achievements" element={<Achievements />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-        </div>
-        {/* Global overlays */}
-        <DistractionNotification />
-        <AICoachFloat />
-        <ToastContainer />
+        <AppRoutes />
       </div>
     </BrowserRouter>
+  );
+}
+
+// Inner component lives inside BrowserRouter so useNavigate works
+function AppRoutes() {
+  // Keyboard shortcuts need to be inside BrowserRouter for useNavigate to work
+  useKeyboardShortcuts();
+
+  return (
+    <>
+      <TopBar />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto p-6">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/focus" element={<FocusMode />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/insights" element={<Insights />} />
+            <Route path="/goals" element={<Goals />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/achievements" element={<Achievements />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
+      {/* Global overlays */}
+      <DistractionNotification />
+      <AICoachFloat />
+      <ToastContainer />
+    </>
   );
 }

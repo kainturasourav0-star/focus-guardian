@@ -2,8 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Play, ShieldOff, FileText, Bot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { sessionsApi } from '../../services/api';
-import { useSessionStore } from '../../store/useSessionStore';
 
 interface Action {
   id: string;
