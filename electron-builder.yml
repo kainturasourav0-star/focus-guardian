@@ -1,0 +1,54 @@
+appId: com.focusguardian.app
+productName: Focus Guardian
+copyright: Copyright © 2024 Focus Guardian
+
+directories:
+  output: release
+  buildResources: assets
+
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - "!**/*.map"
+  - "!**/node_modules/**"
+
+extraResources:
+  - from: backend
+    to: backend
+    filter:
+      - "backend.exe"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/icon.png
+  artifactName: FocusGuardian-Setup-${version}.exe
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Focus Guardian
+  installerIcon: assets/icon.png
+  uninstallerIcon: assets/icon.png
+
+mac:
+  target:
+    - dmg
+  icon: assets/icon.png
+  category: public.app-category.productivity
+  artifactName: FocusGuardian-${version}.dmg
+
+linux:
+  target:
+    - AppImage
+    - deb
+  icon: assets/icon.png
+  category: Office
+
+publish:
+  provider: github
+  releaseType: release
